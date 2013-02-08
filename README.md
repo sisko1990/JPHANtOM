@@ -1,4 +1,4 @@
-PHANtOM
+JPHANtOM
 =======
 
-PHANtOM is a Joomla! component and is an acronym for Password Hash ANd pOlicy Manager
+JPHANtOM is a Joomla! component and is an acronym for Password Hash ANd pOlicy Manager.
