@@ -10,8 +10,17 @@ defined('_JEXEC') or die;
 // Import some helpers
 jimport('joomla.user.helper');
 
-abstract class JPhantomLib
+class JPhantomLib
 {
+
+    /**
+     * Saves the default global password hash algorithm
+     *
+     * @access private
+     * @var string
+     */
+    private $default_hash_algorithm = 'md5-hex';
+
     /**
      * Holds all possible Joomla! password hashes.
      *
@@ -21,30 +30,44 @@ abstract class JPhantomLib
      */
     private static $available_jhashes = array('ssha', 'sha', 'crypt', 'smd5', 'md5-hex', 'aprmd5', 'md5-base64');
 
+
+    /**
+     * Sets the default hash algorithm.
+     * Possible values: ssha, sha, crypt, smd5, md5-hex, aprmd5, md5-base64 or drupal
+     *
+     * @access public
+     * @param string $hash_algorithm The hash algorithm to use as default
+     */
+    public function setDefaultHashAlgorithm($hash_algorithm)
+    {
+        if (in_array($hash_algorithm, self::$available_jhashes) || $hash_algorithm === 'drupal')
+        {
+            $this->default_hash_algorithm = $hash_algorithm;
+        }
+    }
+
     /**
      * This method checks if we have a valid Joomla! user password and returns the hash algorithm.
      * If it is not a Joomla! hash or the password hash comparison is wrong it will return false.
      *
-     * @static
      * @access public
-     * @param string $password_hash           The password hash from database
-     * @param string $password_hash_algorithm The Joomla! hash algorithm to test for
-     * @param string $password                The password in plain text
+     * @param string $password_hash_and_salt The password hash from database
+     * @param string $password               The password in plain text
      * @return string|false
      */
-    public static function getJoomlaPasswordHashAlgorithmForPassword($password_hash, $password_hash_algorithm, $password)
+    public function getJoomlaPasswordHashAlgorithmForPassword($password_hash_and_salt, $password)
     {
         // If password has ":" in it, it is a Joomla! password hash
-        if ((substr($password_hash, 0, 3) !== '$S$') && (strpos($password_hash, ':') !== false))
+        if ((substr($password_hash_and_salt, 0, 3) !== '$S$') && (strpos($password_hash_and_salt, ':') !== false))
         {
-            $parts = explode(':', $password_hash);
+            $parts = explode(':', $password_hash_and_salt);
             $crypt = $parts[0];
             $salt = @$parts[1];
-            $testcrypt = JUserHelper::getCryptedPassword($password, $salt, $password_hash_algorithm);
+            $testcrypt = JUserHelper::getCryptedPassword($password, $salt, $this->default_hash_algorithm);
 
             if ($crypt === $testcrypt)
             {
-                return $password_hash_algorithm;
+                return $this->default_hash_algorithm;
             }
             else
             {
@@ -73,20 +96,19 @@ abstract class JPhantomLib
      * This method checks if we have a valid Drupal user password and returns true.
      * If it is not a Drupal hash or the password hash comparison is wrong it will return false.
      *
-     * @static
      * @access public
-     * @param string $password_hash The password hash from database
-     * @param string $password      The password in plain text
+     * @param string $password_hash_and_salt The password hash from database
+     * @param string $password               The password in plain text
      * @return string|false
      */
-    public static function checkDrupalPasswordHashAlgorithmForPassword($password_hash, $password)
+    public function checkDrupalPasswordHashAlgorithmForPassword($password_hash_and_salt, $password)
     {
         // Check if we have a Drupal hash
-        if (substr($password_hash, 0, 3) === '$S$')
+        if (substr($password_hash_and_salt, 0, 3) === '$S$')
         {
             jimport('jphantom.hashes.drupal_password_hash');
 
-            if (user_check_password($password, $password_hash) === true)
+            if (user_check_password($password, $password_hash_and_salt) === true)
             {
                 // Password is correct
                 return true;
@@ -102,6 +124,21 @@ abstract class JPhantomLib
             // No Drupal password hash format
             return false;
         }
+    }
+
+
+    /**
+     * Check if the password is valid. If it is rigth it returns true otherwise false.
+     * This function also updates the hash if it is not the default hash.
+     *
+     * @access public
+     * @param string $password_hash_and_salt The password hash from database
+     * @param string $password               The password in plain text
+     * @return boolean
+     */
+    public function checkPasswordWithStoredHash($password_hash_and_salt, $password)
+    {
+        // @TODO: Implement!
     }
 
 
