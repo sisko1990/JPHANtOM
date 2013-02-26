@@ -128,17 +128,110 @@ class JPhantomLib
 
 
     /**
+     * Generates a new hash for a password. The default hash algorithm is used for hashing.
+     * A password should have at least 6 characters without whitespaces at the beginning and end.
+     *
+     * @access public
+     * @param string $password_to_hash
+     * @return string
+     * @throws Exception
+     */
+    public function getHashForPassword($password_to_hash)
+    {
+        if (!empty($password_to_hash))
+        {
+            // Trim whitespaces
+            $password_to_hash = trim($password_to_hash);
+
+            if(strlen($password_to_hash) >= 6)
+            {
+                // Hash generation for Joomla! hashes
+                if ($this->default_hash_algorithm !== 'drupal')
+                {
+                    $salt = JUserHelper::genRandomPassword(32);
+                    $crypt = JUserHelper::getCryptedPassword($password_to_hash, $salt, $this->default_hash_algorithm);
+                    $newHash = $crypt . ':' . $salt;
+                }
+                else
+                {
+                    jimport('jphantom.hashes.drupal_password_hash');
+
+                    $newHash = user_hash_password($password_to_hash);
+                }
+                return $newHash;
+            }
+            else
+            {
+                throw new Exception('The password must contain at least 6 characters without whitespaces at beginning and end!');
+            }
+        }
+        else
+        {
+            throw new Exception('A password cannot be empty for hashing!');
+        }
+    }
+
+
+    /**
      * Check if the password is valid. If it is rigth it returns true otherwise false.
      * This function also updates the hash if it is not the default hash.
      *
      * @access public
      * @param string $password_hash_and_salt The password hash from database
-     * @param string $password               The password in plain text
+     * @param string $password_to_check      The password in plain text
      * @return boolean
      */
-    public function checkPasswordWithStoredHash($password_hash_and_salt, $password)
+    public function checkPasswordWithStoredHash($password_hash_and_salt, $password_to_check)
     {
-        // @TODO: Implement!
+        if (!empty($password_hash_and_salt) && !empty($password_to_check))
+        {
+            switch ($this->default_hash_algorithm)
+            {
+                // The current algorithm for all users is a Joomla! one
+                case in_array($this->default_hash_algorithm, self::$available_jhashes):
+                    if ($this->getJoomlaPasswordHashAlgorithmForPassword($password_hash_and_salt,
+                                                                         $password_to_check) !== false)
+                    {
+                        return true;
+                    }
+                    elseif ($this->checkDrupalPasswordHashAlgorithmForPassword($password_hash_and_salt,
+                                                                               $password_to_check) === true)
+                    {
+                        $this->jSecureHashesUpdateJoomlaHash();
+                        return true;
+                    }
+                    else
+                    {
+                        $response->status = JAuthentication::STATUS_FAILURE;
+                        $response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
+                    }
+                    break;
+
+                // The current algorithm for all users is a Drupal one
+                case 'drupal':
+                    if ($this->jSecureHashesCheckDrupalPassword() === true)
+                    {
+                        $this->jSecureHashesLogin($credentials, $options, $response);
+                    }
+                    elseif ($this->jSecureHashesCheckJoomlaPassword() === true)
+                    {
+                        // Update to Drupal hash
+                        $this->jSecureHashesUpdateDrupalHash();
+                        $this->jSecureHashesLogin($credentials, $options, $response);
+                    }
+                    else
+                    {
+                        $response->status = JAuthentication::STATUS_FAILURE;
+                        $response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
+                    }
+                    break;
+
+                default:
+                    $response->status = JAuthentication::STATUS_FAILURE;
+                    $response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
+                    break;
+            }
+        }
     }
 
 

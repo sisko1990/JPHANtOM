@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @version		$Id: drupal_password_hash.php 3 2011-08-31 13:59:07Z sisko1990 $
  * @copyright	Copyright (C) Drupal. All rights reserved.
  * @copyright	Copyright (C) 2011 Jan Erik Zassenhaus - Joomla! Secure Password Hashes. All rights reserved.
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
