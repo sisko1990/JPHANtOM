@@ -10,6 +10,10 @@ defined('_JEXEC') or die;
 // Import some helpers
 jimport('joomla.user.helper');
 
+// Define Exceptions
+class InvalidPassException extends Exception {}
+class NoUserException extends Exception {}
+
 class JPhantomLib
 {
 
@@ -29,6 +33,34 @@ class JPhantomLib
      * @var array
      */
     private static $available_jhashes = array('ssha', 'sha', 'crypt', 'smd5', 'md5-hex', 'aprmd5', 'md5-base64');
+
+
+    /**
+     * Saves a new password hash in database.
+     *
+     * @access private
+     * @param string $hash    The password hash to save in database
+     * @param int    $user_id The user_id from #_users
+     * @throws Exception
+     */
+    private function updatePasswordHashInDatabase($hash, $user_id)
+    {
+        if (!empty($hash) && !empty($user_id) && is_int($user_id))
+        {
+            // Get a database object
+            $db = JFactory::getDbo();
+
+            $db->setQuery(
+                'UPDATE #__users' .
+                ' SET password = "' . $hash . '"' .
+                ' WHERE id = ' . $user_id
+            )->query();
+        }
+        else
+        {
+            throw new Exception('Hash and user_id cannot be empty or user_id is not an integer value!');
+        }
+    }
 
 
     /**
@@ -174,14 +206,17 @@ class JPhantomLib
 
     /**
      * Check if the password is valid. If it is rigth it returns true otherwise false.
-     * This function also updates the hash if it is not the default hash.
+     * This function also updates the hash if it is not the default hash (only possible with correct $user_id parameter).
      *
      * @access public
      * @param string $password_hash_and_salt The password hash from database
      * @param string $password_to_check      The password in plain text
+     * @param int    $user_id                The id from #_users to update a wrong hash
      * @return boolean
+     * @throws InvalidPassException
+     * @throws NoUserException
      */
-    public function checkPasswordWithStoredHash($password_hash_and_salt, $password_to_check)
+    public function checkPasswordWithStoredHash($password_hash_and_salt, $password_to_check, $user_id = null)
     {
         if (!empty($password_hash_and_salt) && !empty($password_to_check))
         {
@@ -197,38 +232,46 @@ class JPhantomLib
                     elseif ($this->checkDrupalPasswordHashAlgorithmForPassword($password_hash_and_salt,
                                                                                $password_to_check) === true)
                     {
-                        $this->jSecureHashesUpdateJoomlaHash();
+                        if(!is_null($user_id) && is_int($user_id))
+                        {
+                            // Update to Joomla! hash
+                            $newHash = $this->getHashForPassword($password_to_check);
+                            $this->updatePasswordHashInDatabase($newHash, $user_id);
+                        }
                         return true;
                     }
                     else
                     {
-                        $response->status = JAuthentication::STATUS_FAILURE;
-                        $response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
+                        throw new InvalidPassException(JText::_('JGLOBAL_AUTH_INVALID_PASS'));
                     }
                     break;
 
                 // The current algorithm for all users is a Drupal one
                 case 'drupal':
-                    if ($this->jSecureHashesCheckDrupalPassword() === true)
+                    if ($this->checkDrupalPasswordHashAlgorithmForPassword($password_hash_and_salt,
+                                                                           $password_to_check) === true)
                     {
-                        $this->jSecureHashesLogin($credentials, $options, $response);
+                        return true;
                     }
-                    elseif ($this->jSecureHashesCheckJoomlaPassword() === true)
+                    elseif ($this->getJoomlaPasswordHashAlgorithmForPassword($password_hash_and_salt,
+                                                                             $password_to_check) !== false)
                     {
-                        // Update to Drupal hash
-                        $this->jSecureHashesUpdateDrupalHash();
-                        $this->jSecureHashesLogin($credentials, $options, $response);
+                        if(!is_null($user_id) && is_int($user_id))
+                        {
+                            // Update to Drupal hash
+                            $newHash = $this->getHashForPassword($password_to_check);
+                            $this->updatePasswordHashInDatabase($newHash, $user_id);
+                        }
+                        return true;
                     }
                     else
                     {
-                        $response->status = JAuthentication::STATUS_FAILURE;
-                        $response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
+                        throw new InvalidPassException(JText::_('JGLOBAL_AUTH_INVALID_PASS'));
                     }
                     break;
 
                 default:
-                    $response->status = JAuthentication::STATUS_FAILURE;
-                    $response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
+                    throw new NoUserException(JText::_('JGLOBAL_AUTH_NO_USER'));
                     break;
             }
         }

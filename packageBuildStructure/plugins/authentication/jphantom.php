@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * @copyright Copyright (C) 2005 - 2012 Open Source Matters, Inc. All rights reserved.
@@ -41,10 +41,64 @@ class plgAuthenticationJPhantom extends JPlugin
             return false;
         }
 
-        jimport('jphantom.jphantom');
-        $jphantomlib = new JPhantomLib();
-
         // Initialise variables.
         $conditions = '';
+
+        // Get a database object
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+
+        $query->select('id, password');
+        $query->from('#__users');
+        $query->where('username = ' . $db->Quote($credentials['username']));
+        $db->setQuery($query);
+        $result = $db->loadObject();
+
+        if($result)
+        {
+            jimport('jphantom.jphantom');
+            $jphantomlib = new JPhantomLib();
+            //$jphantomlib->setDefaultHashAlgorithm('drupal');
+            // @TODO: Fix problem if user password is shorter than 6 characters.
+            // Maybe force user to change the password immediately?!
+            try
+            {
+                if($jphantomlib->checkPasswordWithStoredHash($result->password, $credentials['password'],
+                                                             (int) $result->id) === true)
+                {
+                    $user = JUser::getInstance($result->id);
+                    $response->username = $user->username;
+                    $response->email = $user->email;
+                    $response->fullname = $user->name;
+
+                    if (JFactory::getApplication()->isAdmin())
+                    {
+                        $response->language = $user->getParam('admin_language');
+                    }
+                    else
+                    {
+                        $response->language = $user->getParam('language');
+                    }
+                    $response->status = JAuthentication::STATUS_SUCCESS;
+                    $response->error_message = '';
+                }
+
+            }
+            catch (InvalidPassException $ipexc)
+            {
+                $response->status = JAuthentication::STATUS_FAILURE;
+				$response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
+            }
+            catch (NoUserException $nuexc)
+            {
+                $response->status = JAuthentication::STATUS_FAILURE;
+                $response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
+            }
+        }
+        else
+        {
+            $response->status = JAuthentication::STATUS_FAILURE;
+			$response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
+        }
     }
 }
