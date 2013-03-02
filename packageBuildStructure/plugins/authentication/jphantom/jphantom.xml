@@ -1,16 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="2.5" type="plugin" group="authentication" method="upgrade">
-    <name>PLG_AUTH_JSECUREHASHES</name>
+    <name>PLG_AUTH_JPHANTOM</name>
     <author>Jan Erik Zassenhaus</author>
-    <creationDate>August 2012</creationDate>
-    <copyright>Copyright (C) 2011 Jan Erik Zassenhaus. All rights reserved.</copyright>
+    <creationDate>March 2013</creationDate>
+    <copyright>Copyright (C) 2013 Jan Erik Zassenhaus. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-    <authorEmail>jan.zassenhaus@jgerman.de</authorEmail>
-    <authorUrl>www.jgerman.de</authorUrl>
-    <version>1.2</version>
-    <description>PLG_AUTH_JSECUREHASHES_XML_DESCRIPTION</description>
+    <authorEmail>janerik@zassenhaus.net</authorEmail>
+    <authorUrl>http://sourceforge.net/projects/jphantom</authorUrl>
+    <version>1.0</version>
+    <description>PLG_AUTH_JPHANTOM_XML_DESCRIPTION</description>
     <files>
         <filename plugin="jphantom">jphantom.php</filename>
         <filename>index.html</filename>
     </files>
+    <languages folder="languages">
+        <language tag="en-GB">en-GB/en-GB.plg_authentication_jphantom.ini</language>
+        <language tag="en-GB">en-GB/en-GB.plg_authentication_jphantom.sys.ini</language>
+        <language tag="de-DE">de-DE/de-DE.plg_authentication_jphantom.ini</language>
+        <language tag="de-DE">de-DE/de-DE.plg_authentication_jphantom.sys.ini</language>
+    </languages>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="hashalgorithm" type="groupedlist" default="md5-hex" description="PLG_AUTH_JPHANTOM_FIELD_HASHALGORITHM_DESC" label="PLG_AUTH_JPHANTOM_FIELD_HASHALGORITHM_LABEL">
+                    <group label="PLG_AUTH_JPHANTOM_GROUPFIELD_DRUPALHASH">
+                        <option value="drupal">PLG_AUTH_JPHANTOM_GROUPFIELD_DRUPALHASH_SSHA_512</option>
+                    </group>
+                    <group label="PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES">
+                        <option value="ssha">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_SSHA</option>
+                        <option value="sha">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_SHA</option>
+                        <option value="crypt">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_CRYPT</option>
+                        <option value="smd5">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_SMD5</option>
+                        <option value="md5-hex">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_MD5_HEX</option>
+                        <option value="aprmd5">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_APRMD5</option>
+                        <option value="md5-base64">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_MD5_BASE64</option>
+                    </group>
+                </field>
+                <field name="loginalternative" type="radio" default="username_only" description="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_DESC" label="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_LABEL">
+        					<option value="username_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_USERNAME_ONLY</option>
+        					<option value="email_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_EMAIL_ONLY</option>
+        					<option value="username_and_email">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_BOTH</option>
+        				</field>
+            </fieldset>
+        </fields>
+    </config>
 </extension>
