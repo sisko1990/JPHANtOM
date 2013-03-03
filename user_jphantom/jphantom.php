@@ -37,30 +37,37 @@ class plgUserJPhantom extends JPlugin
          */
 
         //$user['password'] = $jphantomlib->getHashForPassword($user['password_clear']);
-        throw new Exception('Test');
 
-        return false;
+        return true;
     }
 
 
 
     public function onUserAfterSave($user, $isNew, $result, $errors)
     {
-        jimport('jphantom.jphantom');
-        $jphantomlib = new JPhantomLib();
-        //$jphantomlib->setDefaultHashAlgorithm('drupal');
-        // Generate the new password hash
-        $newPasswordHash = $jphantomlib->getHashForPassword($user['password_clear']);
+        try
+        {
+            jimport('jphantom.jphantom');
+            $jphantomlib = new JPhantomLib();
+            //$jphantomlib->setDefaultHashAlgorithm('drupal');
+            // Generate the new password hash
+            $newPasswordHash = $jphantomlib->getHashForPassword($user['password_clear']);
 
-        // Get a database object
-        $db = JFactory::getDbo();
-        $query = $db->getQuery(true);
+            // Get a database object
+            $db = JFactory::getDbo();
+            $query = $db->getQuery(true);
 
-        $query->update($db->quoteName('#__users'));
-        $query->set($db->quoteName('password') . ' = ' . $db->quote($newPasswordHash));
-        $query->where($db->quoteName('id') . ' = ' . $db->quote($user['id']));
+            $query->update($db->quoteName('#__users'));
+            $query->set($db->quoteName('password') . ' = ' . $db->quote($newPasswordHash));
+            $query->where($db->quoteName('id') . ' = ' . $db->quote($user['id']));
 
-        $db->setQuery((string) $query)->query();
+            $db->setQuery((string) $query)->query();
+        }
+        catch (Exception $exc)
+        {
+            throw new Exception($exc->getMessage());
+            return false;
+        }
 
         return true;
     }
