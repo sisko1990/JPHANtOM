@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="2.5" type="plugin" group="user" method="upgrade">
+    <name>PLG_USER_JPHANTOM</name>
+    <author>Jan Erik Zassenhaus</author>
+    <creationDate>March 2013</creationDate>
+    <copyright>Copyright (C) 2013 Jan Erik Zassenhaus. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>janerik@zassenhaus.net</authorEmail>
+    <authorUrl>http://sourceforge.net/projects/jphantom</authorUrl>
+    <version>1.0</version>
+    <description>PLG_USER_JPHANTOM_XML_DESCRIPTION</description>
+    <files>
+        <filename plugin="jphantom">jphantom.php</filename>
+        <filename>index.html</filename>
+    </files>
+</extension>

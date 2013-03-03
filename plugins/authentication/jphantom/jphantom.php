@@ -1,7 +1,6 @@
 ﻿<?php
-
 /**
- * @copyright Copyright (C) 2005 - 2012 Open Source Matters, Inc. All rights reserved.
+ * @copyright Copyright (C) 2005 - 2013 Open Source Matters, Inc. All rights reserved.
  * @copyright Copyright (C) 2013 Jan Erik Zassenhaus. All rights reserved.
  * @license   GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -54,7 +53,7 @@ class plgAuthenticationJPhantom extends JPlugin
         $db->setQuery($query);
         $result = $db->loadObject();
 
-        if($result)
+        if ($result)
         {
             jimport('jphantom.jphantom');
             $jphantomlib = new JPhantomLib();
@@ -63,8 +62,7 @@ class plgAuthenticationJPhantom extends JPlugin
             // Maybe force user to change the password immediately?!
             try
             {
-                if($jphantomlib->checkPasswordWithStoredHash($result->password, $credentials['password'],
-                                                             (int) $result->id) === true)
+                if ($jphantomlib->checkPasswordWithStoredHash($result->password, $credentials['password'], (int) $result->id) === true)
                 {
                     $user = JUser::getInstance($result->id);
                     $response->username = $user->username;
@@ -82,12 +80,11 @@ class plgAuthenticationJPhantom extends JPlugin
                     $response->status = JAuthentication::STATUS_SUCCESS;
                     $response->error_message = '';
                 }
-
             }
             catch (InvalidPassException $ipexc)
             {
                 $response->status = JAuthentication::STATUS_FAILURE;
-				$response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
+                $response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
             }
             catch (NoUserException $nuexc)
             {
@@ -98,7 +95,10 @@ class plgAuthenticationJPhantom extends JPlugin
         else
         {
             $response->status = JAuthentication::STATUS_FAILURE;
-			$response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
+            $response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
         }
     }
+
+
+
 }

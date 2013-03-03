@@ -14,7 +14,9 @@
     <packagerurl>http://sourceforge.net/projects/jphantom</packagerurl>
     <update>http://sourceforge.net/projects/jphantom</update>
     <languages folder="languages">
+        <language tag="en-GB">en-GB/en-GB.lib_jphantom.ini</language>
         <language tag="en-GB">en-GB/en-GB.lib_jphantom.sys.ini</language>
+        <language tag="de-DE">de-DE/de-DE.lib_jphantom.ini</language>
         <language tag="de-DE">de-DE/de-DE.lib_jphantom.sys.ini</language>
     </languages>
     <files folder="libraries">

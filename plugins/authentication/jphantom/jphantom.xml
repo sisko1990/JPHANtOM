@@ -37,10 +37,10 @@
                     </group>
                 </field>
                 <field name="loginalternative" type="radio" default="username_only" description="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_DESC" label="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_LABEL">
-        					<option value="username_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_USERNAME_ONLY</option>
-        					<option value="email_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_EMAIL_ONLY</option>
-        					<option value="username_and_email">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_BOTH</option>
-        				</field>
+                    <option value="username_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_USERNAME_ONLY</option>
+                    <option value="email_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_EMAIL_ONLY</option>
+                    <option value="username_and_email">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_BOTH</option>
+                </field>
             </fieldset>
         </fields>
     </config>
