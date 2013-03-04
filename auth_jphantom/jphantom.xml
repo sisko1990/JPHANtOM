@@ -22,7 +22,9 @@
     <config>
         <fields name="params">
             <fieldset name="basic">
-                <field name="hashalgorithm" type="groupedlist" default="md5-hex" description="PLG_AUTH_JPHANTOM_FIELD_HASHALGORITHM_DESC" label="PLG_AUTH_JPHANTOM_FIELD_HASHALGORITHM_LABEL">
+                <field name="hashalgorithm" type="groupedlist" default="md5-hex"
+                       description="PLG_AUTH_JPHANTOM_FIELD_HASHALGORITHM_DESC"
+                       label="PLG_AUTH_JPHANTOM_FIELD_HASHALGORITHM_LABEL">
                     <group label="PLG_AUTH_JPHANTOM_GROUPFIELD_DRUPALHASH">
                         <option value="drupal">PLG_AUTH_JPHANTOM_GROUPFIELD_DRUPALHASH_SSHA_512</option>
                     </group>
@@ -36,7 +38,9 @@
                         <option value="md5-base64">PLG_AUTH_JPHANTOM_GROUPFIELD_JOOMLAHASHES_MD5_BASE64</option>
                     </group>
                 </field>
-                <field name="loginalternative" type="radio" default="username_only" description="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_DESC" label="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_LABEL">
+                <field name="loginalternative" type="radio" default="username_only"
+                       description="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_DESC"
+                       label="PLG_AUTH_JPHANTOM_FIELD_LOGINALTERNATIVE_LABEL">
                     <option value="username_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_USERNAME_ONLY</option>
                     <option value="email_only">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_EMAIL_ONLY</option>
                     <option value="username_and_email">PLG_AUTH_JPHANTOM_RADIO_LOGINALTERNATIVE_BOTH</option>

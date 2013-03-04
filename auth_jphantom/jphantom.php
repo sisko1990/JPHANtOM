@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 jimport('joomla.plugin.plugin');
 
 /**
- * Joomla secure password hashes authentication plugin
+ * JPHANtOM authentication plugin
  *
  * @package    Joomla.Plugin
  * @subpackage Authentication.jphantom
@@ -22,9 +22,11 @@ class plgAuthenticationJPhantom extends JPlugin
      * This method should handle any authentication and report back to the subject.
      *
      * @access public
-     * @param	 array	 Array holding the user credentials
-     * @param	 array	 Array of extra options
-     * @param	 object	 Authentication response object
+     *
+     * @param  array   Array holding the user credentials
+     * @param  array   Array of extra options
+     * @param  object  Authentication response object
+     *
      * @return boolean
      */
     public function onUserAuthenticate($credentials, $options, &$response)
@@ -33,7 +35,7 @@ class plgAuthenticationJPhantom extends JPlugin
 
         $response->type = 'JPHANtOM';
         // Joomla does not like blank passwords
-        if (empty($credentials['password']))
+        if(empty($credentials['password']))
         {
             $response->status = JAuthentication::STATUS_FAILURE;
             $response->error_message = JText::_('JGLOBAL_AUTH_EMPTY_PASS_NOT_ALLOWED');
@@ -42,34 +44,49 @@ class plgAuthenticationJPhantom extends JPlugin
 
         // Initialise variables.
         $conditions = '';
+        $paramHashAlgorithm = $this->params->get('hashalgorithm');
+        $paramLoginAlternative = $this->params->get('loginalternative');
 
         // Get a database object
         $db = JFactory::getDbo();
         $query = $db->getQuery(true);
 
-        $query->select('id, password');
-        $query->from('#__users');
-        $query->where('username = ' . $db->Quote($credentials['username']));
+        $query->select($db->quoteName(array('id', 'password')));
+        $query->from($db->quoteName('#__users'));
+
+        if($paramLoginAlternative === 'username_and_email')
+        {
+            $query->where(array($db->quoteName('username') . ' = ' . $db->quote($credentials['username']),
+                $db->quoteName('email') . ' = ' . $db->quote($credentials['username'])), 'OR');
+        }
+        elseif($paramLoginAlternative === 'email_only')
+        {
+            $query->where($db->quoteName('email') . ' = ' . $db->quote($credentials['username']));
+        }
+        else
+        {
+            $query->where($db->quoteName('username') . ' = ' . $db->quote($credentials['username']));
+        }
+
         $db->setQuery($query);
         $result = $db->loadObject();
 
-        if ($result)
+        if($result)
         {
             jimport('jphantom.jphantom');
-            $jphantomlib = new JPhantomLib();
-            //$jphantomlib->setDefaultHashAlgorithm('drupal');
-            // @TODO: Fix problem if user password is shorter than 6 characters.
-            // Maybe force user to change the password immediately?!
+            $jphantomlib = new JPhantomHashing();
+            $jphantomlib->setDefaultHashAlgorithm($paramHashAlgorithm);
+
             try
             {
-                if ($jphantomlib->checkPasswordWithStoredHash($result->password, $credentials['password'], (int) $result->id) === true)
+                if($jphantomlib->checkPasswordWithStoredHash($result->password, $credentials['password'], (int)$result->id) === true)
                 {
                     $user = JUser::getInstance($result->id);
                     $response->username = $user->username;
                     $response->email = $user->email;
                     $response->fullname = $user->name;
 
-                    if (JFactory::getApplication()->isAdmin())
+                    if(JFactory::getApplication()->isAdmin())
                     {
                         $response->language = $user->getParam('admin_language');
                     }
@@ -81,15 +98,10 @@ class plgAuthenticationJPhantom extends JPlugin
                     $response->error_message = '';
                 }
             }
-            catch (InvalidPassException $ipexc)
+            catch (Exception $exc)
             {
                 $response->status = JAuthentication::STATUS_FAILURE;
-                $response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');
-            }
-            catch (NoUserException $nuexc)
-            {
-                $response->status = JAuthentication::STATUS_FAILURE;
-                $response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
+                $response->error_message = JText::_($exc->getMessage());
             }
         }
         else
@@ -98,7 +110,6 @@ class plgAuthenticationJPhantom extends JPlugin
             $response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
         }
     }
-
 
 
 }

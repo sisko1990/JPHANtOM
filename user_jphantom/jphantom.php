@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * @copyright Copyright (C) 2005 - 2013 Open Source Matters, Inc. All rights reserved.
  * @copyright Copyright (C) 2013 Jan Erik Zassenhaus. All rights reserved.
@@ -19,7 +19,7 @@ class plgUserJPhantom extends JPlugin
         $lang->load('lib_jphantom', JPATH_SITE);
 
         jimport('jphantom.jphantom');
-        $jphantomlib = new JPhantomLib();
+        $jphantomlib = new JPhantomHashing();
         //$jphantomlib->setDefaultHashAlgorithm('drupal');
 
         /*
@@ -42,14 +42,19 @@ class plgUserJPhantom extends JPlugin
     }
 
 
-
     public function onUserAfterSave($user, $isNew, $result, $errors)
     {
+        // Get the default hash algorithm
+        $jPhantomAuthPlugin = & JPluginHelper::getPlugin('authentication', 'jphantom');
+        $jPhantomAuthPluginParams = new JRegistry($jPhantomAuthPlugin->params);
+        $defaultHashAlgorithm = $jPhantomAuthPluginParams->get('hashalgorithm', 'md5-hex');
+
         try
         {
             jimport('jphantom.jphantom');
-            $jphantomlib = new JPhantomLib();
-            //$jphantomlib->setDefaultHashAlgorithm('drupal');
+            $jphantomlib = new JPhantomHashing();
+            $jphantomlib->setDefaultHashAlgorithm($defaultHashAlgorithm);
+
             // Generate the new password hash
             $newPasswordHash = $jphantomlib->getHashForPassword($user['password_clear']);
 
@@ -61,17 +66,15 @@ class plgUserJPhantom extends JPlugin
             $query->set($db->quoteName('password') . ' = ' . $db->quote($newPasswordHash));
             $query->where($db->quoteName('id') . ' = ' . $db->quote($user['id']));
 
-            $db->setQuery((string) $query)->query();
+            $db->setQuery($query)->query();
         }
         catch (Exception $exc)
         {
             throw new Exception($exc->getMessage());
-            return false;
         }
 
         return true;
     }
-
 
 
 }
