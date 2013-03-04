@@ -11,32 +11,75 @@ jimport('joomla.plugin.plugin');
 
 class plgUserJPhantom extends JPlugin
 {
-
-    public function onUserBeforeSave($olduser, $isNew, $user)
+    /**
+     * Constructor
+     *
+     * @access protected
+     *
+     * @param  object $subject The object to observe
+     * @param  array  $config  An array that holds the plugin configuration
+     *
+     * @since  1.5
+     */
+    public function __construct(& $subject, $config)
     {
+        parent::__construct($subject, $config);
+        $this->loadLanguage();
+
         // Load JPHANtOM library language
         $lang = JFactory::getLanguage();
         $lang->load('lib_jphantom', JPATH_SITE);
+    }
 
-        jimport('jphantom.jphantom');
-        $jphantomlib = new JPhantomHashing();
-        //$jphantomlib->setDefaultHashAlgorithm('drupal');
+    public function onUserBeforeSave($olduser, $isNew, $user)
+    {
+        // Define variables
+        $minPasswordLength = (int)$this->params->get('password_length_min');
+        $maxPasswordLength = (int)$this->params->get('password_length_max');
 
-        /*
-          echo '<pre>';
-          var_dump($olduser);
-          echo '</pre>';
+        $password = trim($user['password_clear']);
+        $passwordLength = strlen($password);
 
-          echo '<pre>';
-          var_dump($isNew);
-          echo '</pre>';
+        if(!empty($password) && !empty($user['password2']))
+        {
+            // Check if the user defined the password length wrong
+            if($minPasswordLength <= $maxPasswordLength)
+            {
+                if($passwordLength <= $minPasswordLength)
+                {
+                    // Password is too short
+                    JFactory::getApplication()
+                        ->enqueueMessage(JText::sprintf('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT_INFO', $minPasswordLength), 'info');
+                    throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT'));
+                    return false;
+                }
+                elseif($passwordLength >= $maxPasswordLength)
+                {
+                    // Password is too long
+                    JFactory::getApplication()
+                        ->enqueueMessage(JText::sprintf('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_LONG_INFO', $maxPasswordLength), 'info');
+                    throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_LONG'));
+                    return false;
+                }
+            }
+            else
+            {
+                if(JFactory::getUser()->authorise('core.manage', 'com_plugins'))
+                {
+                    JFactory::getApplication()->enqueueMessage(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_LENGTH_WRONG'), 'error');
+                }
 
-          echo '<pre>';
-          var_dump($user);
-          echo '</pre>';
-         */
-
-        //$user['password'] = $jphantomlib->getHashForPassword($user['password_clear']);
+                // If the user defined the maxPasswordLength wrong, we only check the minPasswordLength
+                if($passwordLength <= $minPasswordLength)
+                {
+                    // Password is too short
+                    JFactory::getApplication()
+                        ->enqueueMessage(JText::sprintf('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT_INFO', $minPasswordLength), 'info');
+                    throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT'));
+                    return false;
+                }
+            }
+        }
 
         return true;
     }
@@ -44,33 +87,36 @@ class plgUserJPhantom extends JPlugin
 
     public function onUserAfterSave($user, $isNew, $result, $errors)
     {
-        // Get the default hash algorithm
-        $jPhantomAuthPlugin = & JPluginHelper::getPlugin('authentication', 'jphantom');
-        $jPhantomAuthPluginParams = new JRegistry($jPhantomAuthPlugin->params);
-        $defaultHashAlgorithm = $jPhantomAuthPluginParams->get('hashalgorithm', 'md5-hex');
-
-        try
+        if(!empty($user['password_clear']))
         {
-            jimport('jphantom.jphantom');
-            $jphantomlib = new JPhantomHashing();
-            $jphantomlib->setDefaultHashAlgorithm($defaultHashAlgorithm);
+            // Get the default hash algorithm
+            $jPhantomAuthPlugin = & JPluginHelper::getPlugin('authentication', 'jphantom');
+            $jPhantomAuthPluginParams = new JRegistry($jPhantomAuthPlugin->params);
+            $defaultHashAlgorithm = $jPhantomAuthPluginParams->get('hashalgorithm', 'md5-hex');
 
-            // Generate the new password hash
-            $newPasswordHash = $jphantomlib->getHashForPassword($user['password_clear']);
+            try
+            {
+                jimport('jphantom.jphantom');
+                $jphantomlib = new JPhantomHashing();
+                $jphantomlib->setDefaultHashAlgorithm($defaultHashAlgorithm);
 
-            // Get a database object
-            $db = JFactory::getDbo();
-            $query = $db->getQuery(true);
+                // Generate the new password hash
+                $newPasswordHash = $jphantomlib->getHashForPassword($user['password_clear']);
 
-            $query->update($db->quoteName('#__users'));
-            $query->set($db->quoteName('password') . ' = ' . $db->quote($newPasswordHash));
-            $query->where($db->quoteName('id') . ' = ' . $db->quote($user['id']));
+                // Get a database object
+                $db = JFactory::getDbo();
+                $query = $db->getQuery(true);
 
-            $db->setQuery($query)->query();
-        }
-        catch (Exception $exc)
-        {
-            throw new Exception($exc->getMessage());
+                $query->update($db->quoteName('#__users'));
+                $query->set($db->quoteName('password') . ' = ' . $db->quote($newPasswordHash));
+                $query->where($db->quoteName('id') . ' = ' . $db->quote($user['id']));
+
+                $db->setQuery($query)->query();
+            }
+            catch (Exception $exc)
+            {
+                throw new Exception($exc->getMessage());
+            }
         }
 
         return true;
