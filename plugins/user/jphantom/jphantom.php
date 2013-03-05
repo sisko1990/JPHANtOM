@@ -34,50 +34,74 @@ class plgUserJPhantom extends JPlugin
     public function onUserBeforeSave($olduser, $isNew, $user)
     {
         // Define variables
-        $minPasswordLength = (int)$this->params->get('password_length_min');
-        $maxPasswordLength = (int)$this->params->get('password_length_max');
+        $minPasswordLength = (int)$this->params->get('password_length_min', '6');
+        $maxPasswordLength = (int)$this->params->get('password_length_max', '50');
+        $digitsCheck = (int)$this->params->get('password_complexity_digits', '0');
+        $upperAndLowerCheck = (int)$this->params->get('password_complexity_upper_and_lower', '0');
+        $usernameForbiddenCheck = (int)$this->params->get('password_forbidden_text_username', '0');
+        $emailForbiddenCheck = (int)$this->params->get('password_forbidden_text_email', '0');
 
         $password = trim($user['password_clear']);
         $passwordLength = strlen($password);
 
-        if(!empty($password) && !empty($user['password2']))
+        if (!empty($password) && !empty($user['password2']))
         {
+            /* Password length check */
+
             // Check if the user defined the password length wrong
-            if($minPasswordLength <= $maxPasswordLength)
+            if ($minPasswordLength <= $maxPasswordLength)
             {
-                if($passwordLength <= $minPasswordLength)
+                if ($passwordLength <= $minPasswordLength)
                 {
                     // Password is too short
                     JFactory::getApplication()
                         ->enqueueMessage(JText::sprintf('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT_INFO', $minPasswordLength), 'info');
                     throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT'));
-                    return false;
                 }
-                elseif($passwordLength >= $maxPasswordLength)
+                elseif ($passwordLength >= $maxPasswordLength)
                 {
                     // Password is too long
                     JFactory::getApplication()
                         ->enqueueMessage(JText::sprintf('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_LONG_INFO', $maxPasswordLength), 'info');
                     throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_LONG'));
-                    return false;
                 }
             }
             else
             {
-                if(JFactory::getUser()->authorise('core.manage', 'com_plugins'))
+                if (JFactory::getUser()->authorise('core.manage', 'com_plugins'))
                 {
                     JFactory::getApplication()->enqueueMessage(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_LENGTH_WRONG'), 'error');
                 }
 
                 // If the user defined the maxPasswordLength wrong, we only check the minPasswordLength
-                if($passwordLength <= $minPasswordLength)
+                if ($passwordLength <= $minPasswordLength)
                 {
                     // Password is too short
                     JFactory::getApplication()
                         ->enqueueMessage(JText::sprintf('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT_INFO', $minPasswordLength), 'info');
                     throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT'));
-                    return false;
                 }
+            }
+
+            /* Password complexity check */
+            jimport('jphantom.password.validation');
+            $passwordValidation = new JPhantomPasswordValidation($password);
+
+            if ($digitsCheck === 1 && $passwordValidation->hasDigits() === false)
+            {
+                throw new Exception('Keine Zahl!');
+            }
+            elseif ($upperAndLowerCheck === 1 && $passwordValidation->hasUpperAndLowerCaseLetters() === false)
+            {
+                throw new Exception('Keine Groß- und Kleinschreibung!');
+            }
+            elseif ($usernameForbiddenCheck === 1 && $passwordValidation->hasForbiddenText(array($user['username'], $user['name'])) === true)
+            {
+                throw new Exception('Benutzername im Passwort gefunden!');
+            }
+            elseif ($emailForbiddenCheck === 1 && $passwordValidation->hasForbiddenText((string)$user['email']) === true)
+            {
+                throw new Exception('E-Mail im Passwort gefunden!');
             }
         }
 
@@ -87,7 +111,7 @@ class plgUserJPhantom extends JPlugin
 
     public function onUserAfterSave($user, $isNew, $result, $errors)
     {
-        if(!empty($user['password_clear']))
+        if (!empty($user['password_clear']))
         {
             // Get the default hash algorithm
             $jPhantomAuthPlugin = & JPluginHelper::getPlugin('authentication', 'jphantom');
@@ -96,8 +120,8 @@ class plgUserJPhantom extends JPlugin
 
             try
             {
-                jimport('jphantom.jphantom');
-                $jphantomlib = new JPhantomHashing();
+                jimport('jphantom.password.hashing');
+                $jphantomlib = new JPhantomPasswordHashing();
                 $jphantomlib->setDefaultHashAlgorithm($defaultHashAlgorithm);
 
                 // Generate the new password hash

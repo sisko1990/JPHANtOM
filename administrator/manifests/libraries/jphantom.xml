@@ -20,7 +20,8 @@
         <language tag="de-DE">de-DE/de-DE.lib_jphantom.sys.ini</language>
     </languages>
     <files folder="libraries">
-        <folder>hashes</folder>
-        <file>jphantom.php</file>
+        <folder>libsexternal</folder>
+        <folder>password</folder>
+        <file>index.html</file>
     </files>
 </extension>

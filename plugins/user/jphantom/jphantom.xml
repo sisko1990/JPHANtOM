@@ -22,14 +22,42 @@
     <config>
         <fields name="params">
             <fieldset name="basic">
-                <field name="spacer" type="spacer" class="text" label="PLG_USER_JPHANTOM_PASSWORD_LABEL"/>
+                <field name="spacer1" type="spacer" class="text" label="PLG_USER_JPHANTOM_PASSWORD_LENGTH_LABEL"/>
                 <field name="password_length_min" type="integer" default="6"
                        description="PLG_USER_JPHANTOM_MIN_PASSWORD_LENGTH_DESC"
                        label="PLG_USER_JPHANTOM_MIN_PASSWORD_LENGTH_LABEL" first="4" last="99" step="1"/>
                 <field name="password_length_max" type="integer" default="50"
                        description="PLG_USER_JPHANTOM_MAX_PASSWORD_LENGTH_DESC"
                        label="PLG_USER_JPHANTOM_MAX_PASSWORD_LENGTH_LABEL" first="4" last="99" step="1"/>
-                <field name="spacer1" type="spacer" hr="true"/>
+                <field name="spacer2" type="spacer" hr="true"/>
+                <field name="spacer3" type="spacer" class="text" label="PLG_USER_JPHANTOM_PASSWORD_COMPLEXITY_LABEL"/>
+                <field name="password_complexity_digits" type="radio" default="0"
+                       description="PLG_USER_JPHANTOM_PASSWORD_COMPLEXITY_DIGITS_DESC"
+                       label="PLG_USER_JPHANTOM_PASSWORD_COMPLEXITY_DIGITS_LABEL">
+                    <option value="0">JNo</option>
+                    <option value="1">JYes</option>
+                </field>
+                <field name="password_complexity_upper_and_lower" type="radio" default="0"
+                       description="PLG_USER_JPHANTOM_PASSWORD_COMPLEXITY_UPPER_AND_LOWER_DESC"
+                       label="PLG_USER_JPHANTOM_PASSWORD_COMPLEXITY_UPPER_AND_LOWER_LABEL">
+                    <option value="0">JNo</option>
+                    <option value="1">JYes</option>
+                </field>
+                <field name="spacer4" type="spacer" hr="true"/>
+                <field name="spacer5" type="spacer" class="text"
+                       label="PLG_USER_JPHANTOM_PASSWORD_FORBIDDEN_TEXT_LABEL"/>
+                <field name="password_forbidden_text_username" type="radio" default="0"
+                       description="PLG_USER_JPHANTOM_PASSWORD_FORBIDDEN_TEXT_USERNAME_DESC"
+                       label="PLG_USER_JPHANTOM_PASSWORD_FORBIDDEN_TEXT_USERNAME_LABEL">
+                    <option value="0">JNo</option>
+                    <option value="1">JYes</option>
+                </field>
+                <field name="password_forbidden_text_email" type="radio" default="0"
+                       description="PLG_USER_JPHANTOM_PASSWORD_FORBIDDEN_TEXT_EMAIL_DESC"
+                       label="PLG_USER_JPHANTOM_PASSWORD_FORBIDDEN_TEXT_EMAIL_LABEL">
+                    <option value="0">JNo</option>
+                    <option value="1">JYes</option>
+                </field>
             </fieldset>
         </fields>
     </config>

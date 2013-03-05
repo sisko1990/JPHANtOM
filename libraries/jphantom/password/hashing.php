@@ -10,13 +10,14 @@ defined('_JEXEC') or die;
 // Import some helpers
 jimport('joomla.user.helper');
 
+
 /**
- * JPHANtOM library: Hashing
+ * JPHANtOM library: Password hashing
  *
  * @package    Joomla.Library
- * @subpackage JPhantom.Hashing
+ * @subpackage JPhantom.Password.Hashing
  */
-class JPhantomHashing
+class JPhantomPasswordHashing
 {
     /**
      * Saves the default global password hash algorithm.
@@ -146,7 +147,7 @@ class JPhantomHashing
         // Check if we have a Drupal hash
         if(substr($passwordHashAndSalt, 0, 3) === '$S$')
         {
-            jimport('jphantom.hashes.drupal_password_hash');
+            jimport('jphantom.libsexternal.drupal_password_hash');
 
             if(user_check_password($password, $passwordHashAndSalt) === true)
             {
@@ -193,7 +194,7 @@ class JPhantomHashing
             }
             else
             {
-                jimport('jphantom.hashes.drupal_password_hash');
+                jimport('jphantom.libsexternal.drupal_password_hash');
 
                 $newHash = user_hash_password($passwordToHash);
             }
@@ -280,6 +281,4 @@ class JPhantomHashing
             throw new Exception('JGLOBAL_AUTH_EMPTY_PASS_NOT_ALLOWED');
         }
     }
-
-
 }

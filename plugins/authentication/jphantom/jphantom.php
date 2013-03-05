@@ -23,9 +23,9 @@ class plgAuthenticationJPhantom extends JPlugin
      *
      * @access public
      *
-     * @param  array   Array holding the user credentials
-     * @param  array   Array of extra options
-     * @param  object  Authentication response object
+     * @param array  Array holding the user credentials
+     * @param array  Array of extra options
+     * @param object Authentication response object
      *
      * @return boolean
      */
@@ -73,8 +73,8 @@ class plgAuthenticationJPhantom extends JPlugin
 
         if($result)
         {
-            jimport('jphantom.jphantom');
-            $jphantomlib = new JPhantomHashing();
+            jimport('jphantom.password.hashing');
+            $jphantomlib = new JPhantomPasswordHashing();
             $jphantomlib->setDefaultHashAlgorithm($paramHashAlgorithm);
 
             try
