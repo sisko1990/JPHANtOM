@@ -51,14 +51,14 @@ class plgUserJPhantom extends JPlugin
             // Check if the user defined the password length wrong
             if ($minPasswordLength <= $maxPasswordLength)
             {
-                if ($passwordLength <= $minPasswordLength)
+                if ($passwordLength < $minPasswordLength)
                 {
                     // Password is too short
                     JFactory::getApplication()
                         ->enqueueMessage(JText::sprintf('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT_INFO', $minPasswordLength), 'info');
                     throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_PASSWORD_TO_SHORT'));
                 }
-                elseif ($passwordLength >= $maxPasswordLength)
+                elseif ($passwordLength > $maxPasswordLength)
                 {
                     // Password is too long
                     JFactory::getApplication()
@@ -74,7 +74,7 @@ class plgUserJPhantom extends JPlugin
                 }
 
                 // If the user defined the maxPasswordLength wrong, we only check the minPasswordLength
-                if ($passwordLength <= $minPasswordLength)
+                if ($passwordLength < $minPasswordLength)
                 {
                     // Password is too short
                     JFactory::getApplication()
