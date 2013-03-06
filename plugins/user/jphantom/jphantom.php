@@ -89,19 +89,27 @@ class plgUserJPhantom extends JPlugin
 
             if ($digitsCheck === 1 && $passwordValidation->hasDigits() === false)
             {
-                throw new Exception('Keine Zahl!');
+                JFactory::getApplication()
+                    ->enqueueMessage(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_NO_DIGITS_INFO'), 'info');
+                throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_NO_DIGITS'));
             }
             elseif ($upperAndLowerCheck === 1 && $passwordValidation->hasUpperAndLowerCaseLetters() === false)
             {
-                throw new Exception('Keine Groß- und Kleinschreibung!');
+                JFactory::getApplication()
+                    ->enqueueMessage(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_NO_UPPER_AND_LOWER_INFO'), 'info');
+                throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_NO_UPPER_AND_LOWER'));
             }
             elseif ($usernameForbiddenCheck === 1 && $passwordValidation->hasForbiddenText(array($user['username'], $user['name'])) === true)
             {
-                throw new Exception('Benutzername im Passwort gefunden!');
+                JFactory::getApplication()
+                    ->enqueueMessage(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_USERNAME_IN_PASSWORD_INFO'), 'info');
+                throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_USERNAME_IN_PASSWORD'));
             }
             elseif ($emailForbiddenCheck === 1 && $passwordValidation->hasForbiddenText((string)$user['email']) === true)
             {
-                throw new Exception('E-Mail im Passwort gefunden!');
+                JFactory::getApplication()
+                    ->enqueueMessage(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_EMAIL_IN_PASSWORD_INFO'), 'info');
+                throw new Exception(JText::_('PLG_USER_JPHANTOM_ERROR_COMPLEXITY_EMAIL_IN_PASSWORD'));
             }
         }
 

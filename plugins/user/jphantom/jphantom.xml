@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="2.5" type="plugin" group="user" method="upgrade">
+<extension type="plugin" version="2.5" group="user" method="upgrade">
     <name>PLG_USER_JPHANTOM</name>
     <author>Jan Erik Zassenhaus</author>
     <creationDate>March 2013</creationDate>

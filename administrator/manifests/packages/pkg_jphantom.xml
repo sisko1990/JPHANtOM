@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="package" version="2.5" method="upgrade">
+    <name>JPHANtOM</name>
+    <packagename>jphantom</packagename>
+    <version>1.0</version>
+    <author>Jan Erik Zassenhaus</author>
+    <creationDate>March 2013</creationDate>
+    <copyright>Copyright (C) 2013 Jan Erik Zassenhaus. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>janerik@zassenhaus.net</authorEmail>
+    <authorUrl>http://sourceforge.net/projects/jphantom</authorUrl>
+    <url></url>
+    <packager></packager>
+    <packagerurl></packagerurl>
+    <description>JPHANtOM is a Joomla! extension and is an acronym for Password Hash ANd pOlicy Manager.</description>
+    <files>
+        <file type="library" id="jphantom">lib_jphantom.zip</file>
+        <file type="plugin" group="authentication" id="jphantom">plg_auth_jphantom.zip</file>
+        <file type="plugin" group="user" id="jphantom">plg_user_jphantom.zip</file>
+    </files>
+</extension>
