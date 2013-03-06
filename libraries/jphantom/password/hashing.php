@@ -48,10 +48,10 @@ class JPhantomPasswordHashing
      */
     private function updatePasswordHashInDatabase($hash, $user_id)
     {
-        if(!empty($hash) && !empty($user_id) && is_int($user_id))
+        if (!empty($hash) && !empty($user_id) && is_int($user_id))
         {
             // Get a database object
-            $db = JFactory::getDbo();
+            $db    = JFactory::getDbo();
             $query = $db->getQuery(true);
 
             $query->update($db->quoteName('#__users'));
@@ -77,7 +77,7 @@ class JPhantomPasswordHashing
      */
     public function setDefaultHashAlgorithm($hashAlgorithm)
     {
-        if(in_array($hashAlgorithm, self::$availableJHashes) || $hashAlgorithm === 'drupal')
+        if (in_array($hashAlgorithm, self::$availableJHashes) || $hashAlgorithm === 'drupal')
         {
             $this->defaultHashAlgorithm = $hashAlgorithm;
         }
@@ -98,14 +98,14 @@ class JPhantomPasswordHashing
     public function getJoomlaPasswordHashAlgorithmForPassword($passwordHashAndSalt, $password)
     {
         // If password has ":" in it, it is a Joomla! password hash
-        if((substr($passwordHashAndSalt, 0, 3) !== '$S$') && (strpos($passwordHashAndSalt, ':') !== false))
+        if ((substr($passwordHashAndSalt, 0, 3) !== '$S$') && (strpos($passwordHashAndSalt, ':') !== false))
         {
-            $parts = explode(':', $passwordHashAndSalt);
-            $crypt = $parts[0];
-            $salt = @$parts[1];
+            $parts     = explode(':', $passwordHashAndSalt);
+            $crypt     = $parts[0];
+            $salt      = @$parts[1];
             $testcrypt = JUserHelper::getCryptedPassword($password, $salt, $this->defaultHashAlgorithm);
 
-            if($crypt === $testcrypt)
+            if ($crypt === $testcrypt)
             {
                 return $this->defaultHashAlgorithm;
             }
@@ -114,11 +114,12 @@ class JPhantomPasswordHashing
                 foreach (self::$availableJHashes as $hashtype)
                 {
                     $testcrypt = JUserHelper::getCryptedPassword($password, $salt, $hashtype);
-                    if($crypt === $testcrypt)
+                    if ($crypt === $testcrypt)
                     {
                         return $hashtype;
                     }
                 }
+
                 // No match with the available Joomla! hashes
                 return false;
             }
@@ -145,11 +146,11 @@ class JPhantomPasswordHashing
     public function checkDrupalPasswordHashAlgorithmForPassword($passwordHashAndSalt, $password)
     {
         // Check if we have a Drupal hash
-        if(substr($passwordHashAndSalt, 0, 3) === '$S$')
+        if (substr($passwordHashAndSalt, 0, 3) === '$S$')
         {
             jimport('jphantom.libsexternal.drupal_password_hash');
 
-            if(user_check_password($password, $passwordHashAndSalt) === true)
+            if (user_check_password($password, $passwordHashAndSalt) === true)
             {
                 // Password is correct
                 return true;
@@ -180,16 +181,16 @@ class JPhantomPasswordHashing
      */
     public function getHashForPassword($passwordToHash)
     {
-        if(!empty($passwordToHash))
+        if (!empty($passwordToHash))
         {
             // Trim whitespaces
             $passwordToHash = trim($passwordToHash);
 
             // Hash generation for Joomla! hashes
-            if($this->defaultHashAlgorithm !== 'drupal')
+            if ($this->defaultHashAlgorithm !== 'drupal')
             {
-                $salt = JUserHelper::genRandomPassword(32);
-                $crypt = JUserHelper::getCryptedPassword($passwordToHash, $salt, $this->defaultHashAlgorithm);
+                $salt    = JUserHelper::genRandomPassword(32);
+                $crypt   = JUserHelper::getCryptedPassword($passwordToHash, $salt, $this->defaultHashAlgorithm);
                 $newHash = $crypt . ':' . $salt;
             }
             else
@@ -223,24 +224,25 @@ class JPhantomPasswordHashing
      */
     public function checkPasswordWithStoredHash($passwordHashAndSalt, $passwordToCheck, $user_id = null)
     {
-        if(!empty($passwordHashAndSalt) && !empty($passwordToCheck))
+        if (!empty($passwordHashAndSalt) && !empty($passwordToCheck))
         {
             switch ($this->defaultHashAlgorithm)
             {
                 // The current algorithm for all users is a Joomla! one
                 case in_array($this->defaultHashAlgorithm, self::$availableJHashes):
-                    if($this->getJoomlaPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) !== false)
+                    if ($this->getJoomlaPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) !== false)
                     {
                         return true;
                     }
-                    elseif($this->checkDrupalPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) === true)
+                    elseif ($this->checkDrupalPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) === true)
                     {
-                        if(!is_null($user_id) && is_int($user_id))
+                        if (!is_null($user_id) && is_int($user_id))
                         {
                             // Update to Joomla! hash
                             $newHash = $this->getHashForPassword($passwordToCheck);
                             $this->updatePasswordHashInDatabase($newHash, $user_id);
                         }
+
                         return true;
                     }
                     else
@@ -251,18 +253,19 @@ class JPhantomPasswordHashing
 
                 // The current algorithm for all users is a Drupal one
                 case 'drupal':
-                    if($this->checkDrupalPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) === true)
+                    if ($this->checkDrupalPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) === true)
                     {
                         return true;
                     }
-                    elseif($this->getJoomlaPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) !== false)
+                    elseif ($this->getJoomlaPasswordHashAlgorithmForPassword($passwordHashAndSalt, $passwordToCheck) !== false)
                     {
-                        if(!is_null($user_id) && is_int($user_id))
+                        if (!is_null($user_id) && is_int($user_id))
                         {
                             // Update to Drupal hash
                             $newHash = $this->getHashForPassword($passwordToCheck);
                             $this->updatePasswordHashInDatabase($newHash, $user_id);
                         }
+
                         return true;
                     }
                     else

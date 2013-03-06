@@ -35,31 +35,32 @@ class plgAuthenticationJPhantom extends JPlugin
 
         $response->type = 'JPHANtOM';
         // Joomla does not like blank passwords
-        if(empty($credentials['password']))
+        if (empty($credentials['password']))
         {
-            $response->status = JAuthentication::STATUS_FAILURE;
+            $response->status        = JAuthentication::STATUS_FAILURE;
             $response->error_message = JText::_('JGLOBAL_AUTH_EMPTY_PASS_NOT_ALLOWED');
+
             return false;
         }
 
         // Initialise variables.
-        $conditions = '';
-        $paramHashAlgorithm = $this->params->get('hashalgorithm');
+        $conditions            = '';
+        $paramHashAlgorithm    = $this->params->get('hashalgorithm');
         $paramLoginAlternative = $this->params->get('loginalternative');
 
         // Get a database object
-        $db = JFactory::getDbo();
+        $db    = JFactory::getDbo();
         $query = $db->getQuery(true);
 
         $query->select($db->quoteName(array('id', 'password')));
         $query->from($db->quoteName('#__users'));
 
-        if($paramLoginAlternative === 'username_and_email')
+        if ($paramLoginAlternative === 'username_and_email')
         {
             $query->where(array($db->quoteName('username') . ' = ' . $db->quote($credentials['username']),
                 $db->quoteName('email') . ' = ' . $db->quote($credentials['username'])), 'OR');
         }
-        elseif($paramLoginAlternative === 'email_only')
+        elseif ($paramLoginAlternative === 'email_only')
         {
             $query->where($db->quoteName('email') . ' = ' . $db->quote($credentials['username']));
         }
@@ -71,7 +72,7 @@ class plgAuthenticationJPhantom extends JPlugin
         $db->setQuery($query);
         $result = $db->loadObject();
 
-        if($result)
+        if ($result)
         {
             jimport('jphantom.password.hashing');
             $jphantomlib = new JPhantomPasswordHashing();
@@ -79,14 +80,14 @@ class plgAuthenticationJPhantom extends JPlugin
 
             try
             {
-                if($jphantomlib->checkPasswordWithStoredHash($result->password, $credentials['password'], (int)$result->id) === true)
+                if ($jphantomlib->checkPasswordWithStoredHash($result->password, $credentials['password'], (int)$result->id) === true)
                 {
-                    $user = JUser::getInstance($result->id);
+                    $user               = JUser::getInstance($result->id);
                     $response->username = $user->username;
-                    $response->email = $user->email;
+                    $response->email    = $user->email;
                     $response->fullname = $user->name;
 
-                    if(JFactory::getApplication()->isAdmin())
+                    if (JFactory::getApplication()->isAdmin())
                     {
                         $response->language = $user->getParam('admin_language');
                     }
@@ -94,19 +95,19 @@ class plgAuthenticationJPhantom extends JPlugin
                     {
                         $response->language = $user->getParam('language');
                     }
-                    $response->status = JAuthentication::STATUS_SUCCESS;
+                    $response->status        = JAuthentication::STATUS_SUCCESS;
                     $response->error_message = '';
                 }
             }
             catch (Exception $exc)
             {
-                $response->status = JAuthentication::STATUS_FAILURE;
+                $response->status        = JAuthentication::STATUS_FAILURE;
                 $response->error_message = JText::_($exc->getMessage());
             }
         }
         else
         {
-            $response->status = JAuthentication::STATUS_FAILURE;
+            $response->status        = JAuthentication::STATUS_FAILURE;
             $response->error_message = JText::_('JGLOBAL_AUTH_NO_USER');
         }
     }

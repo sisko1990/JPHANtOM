@@ -161,6 +161,7 @@ class JPhantomPasswordValidation
                     return true;
                 }
             }
+
             return false;
         }
     }

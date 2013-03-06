@@ -34,14 +34,14 @@ class plgUserJPhantom extends JPlugin
     public function onUserBeforeSave($olduser, $isNew, $user)
     {
         // Define variables
-        $minPasswordLength = (int)$this->params->get('password_length_min', '6');
-        $maxPasswordLength = (int)$this->params->get('password_length_max', '50');
-        $digitsCheck = (int)$this->params->get('password_complexity_digits', '0');
-        $upperAndLowerCheck = (int)$this->params->get('password_complexity_upper_and_lower', '0');
+        $minPasswordLength      = (int)$this->params->get('password_length_min', '6');
+        $maxPasswordLength      = (int)$this->params->get('password_length_max', '50');
+        $digitsCheck            = (int)$this->params->get('password_complexity_digits', '0');
+        $upperAndLowerCheck     = (int)$this->params->get('password_complexity_upper_and_lower', '0');
         $usernameForbiddenCheck = (int)$this->params->get('password_forbidden_text_username', '0');
-        $emailForbiddenCheck = (int)$this->params->get('password_forbidden_text_email', '0');
+        $emailForbiddenCheck    = (int)$this->params->get('password_forbidden_text_email', '0');
 
-        $password = trim($user['password_clear']);
+        $password       = trim($user['password_clear']);
         $passwordLength = strlen($password);
 
         if (!empty($password) && !empty($user['password2']))
@@ -122,9 +122,9 @@ class plgUserJPhantom extends JPlugin
         if (!empty($user['password_clear']))
         {
             // Get the default hash algorithm
-            $jPhantomAuthPlugin = & JPluginHelper::getPlugin('authentication', 'jphantom');
+            $jPhantomAuthPlugin       = & JPluginHelper::getPlugin('authentication', 'jphantom');
             $jPhantomAuthPluginParams = new JRegistry($jPhantomAuthPlugin->params);
-            $defaultHashAlgorithm = $jPhantomAuthPluginParams->get('hashalgorithm', 'md5-hex');
+            $defaultHashAlgorithm     = $jPhantomAuthPluginParams->get('hashalgorithm', 'md5-hex');
 
             try
             {
@@ -136,7 +136,7 @@ class plgUserJPhantom extends JPlugin
                 $newPasswordHash = $jphantomlib->getHashForPassword($user['password_clear']);
 
                 // Get a database object
-                $db = JFactory::getDbo();
+                $db    = JFactory::getDbo();
                 $query = $db->getQuery(true);
 
                 $query->update($db->quoteName('#__users'));
