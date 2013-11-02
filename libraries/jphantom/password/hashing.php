@@ -210,7 +210,7 @@ class JPhantomPasswordHashing
 
 
     /**
-     * Check if the password is valid. If it is rigth it returns true otherwise false.
+     * Check if the password is valid. If it is right it returns true otherwise false.
      * This function also updates the hash if it is not the default hash (only possible with correct $user_id parameter).
      *
      * @access public
